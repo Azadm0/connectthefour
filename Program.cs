@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 class Program
@@ -22,7 +22,7 @@ class Program
             if (turn == PLAYER)
             {
                 Console.Write("Player (0-6): ");
-                string input = Console.ReadLine();
+                string input = Console.ReadLine()!;
 
                 if (!int.TryParse(input, out int col) || col < 0 || col >= COLS)
                     continue;
@@ -230,21 +230,109 @@ class Program
 
     static int Evaluate(int[,] boardState)
     {
+        if (WinningMove(boardState, AI))
+            return 1000000;
+
+        if (WinningMove(boardState, PLAYER))
+            return -1000000;
+
         int score = 0;
 
         for (int r = 0; r < ROWS; r++)
         {
-            for (int c = 0; c < COLS; c++)
-            {
-                if (boardState[r, c] == AI)
-                    score += 2;
+            if (boardState[r, 3] == AI)
+                score += 6;
+            else if (boardState[r, 3] == PLAYER)
+                score -= 6;
+        }
 
-                if (boardState[r, c] == PLAYER)
-                    score -= 2;
+        for (int r = 0; r < ROWS; r++)
+        {
+            for (int c = 0; c < COLS - 3; c++)
+            {
+                score += EvaluateWindow(
+                    boardState[r, c],
+                    boardState[r, c + 1],
+                    boardState[r, c + 2],
+                    boardState[r, c + 3]);
+            }
+        }
+
+        for (int c = 0; c < COLS; c++)
+        {
+            for (int r = 0; r < ROWS - 3; r++)
+            {
+                score += EvaluateWindow(
+                    boardState[r, c],
+                    boardState[r + 1, c],
+                    boardState[r + 2, c],
+                    boardState[r + 3, c]);
+            }
+        }
+
+        for (int r = 0; r < ROWS - 3; r++)
+        {
+            for (int c = 0; c < COLS - 3; c++)
+            {
+                score += EvaluateWindow(
+                    boardState[r, c],
+                    boardState[r + 1, c + 1],
+                    boardState[r + 2, c + 2],
+                    boardState[r + 3, c + 3]);
+            }
+        }
+
+        for (int r = 3; r < ROWS; r++)
+        {
+            for (int c = 0; c < COLS - 3; c++)
+            {
+                score += EvaluateWindow(
+                    boardState[r, c],
+                    boardState[r - 1, c + 1],
+                    boardState[r - 2, c + 2],
+                    boardState[r - 3, c + 3]);
             }
         }
 
         return score;
+    }
+    static int EvaluateWindow(int a, int b, int c, int d)
+    {
+        int ai = 0;
+        int player = 0;
+        int empty = 0;
+
+        int[] window = { a, b, c, d };
+
+        foreach (int cell in window)
+        {
+            if (cell == AI)
+                ai++;
+            else if (cell == PLAYER)
+                player++;
+            else
+                empty++;
+        }
+
+        if (ai == 4)
+            return 1000;
+
+        if (ai == 3 && empty == 1)
+            return 50;
+
+        if (ai == 2 && empty == 2)
+            return 10;
+
+        if (player == 4)
+            return -1000;
+
+        if (player == 3 && empty == 1)
+            return -80;
+
+        if (player == 2 && empty == 2)
+            return -5;
+
+        return 0;
     }
     static int[,] Copy(int[,] boardState)
     {
