@@ -26,14 +26,14 @@ public GameForm()
     statusLabel.Left = 10;
     statusLabel.Top = 15; 
     statusLabel.Width = 200;
-
+    // 2. Restart button
     restartButton = new Button();
     restartButton.Text = "Restart";
     restartButton.Left = 220;
     restartButton.Top = 10;
     restartButton.Click += RestartGame!;
 
-
+   //3. setup the board
     boardControl = new BoardControl();
     boardControl.Left = 0;
     boardControl.Top = 50; 
